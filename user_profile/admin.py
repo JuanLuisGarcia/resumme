@@ -1,5 +1,5 @@
 from django.contrib import admin
-from user_profile.models import ProviderProfile, Course, Provider, Status, CourseStatus
+from user_profile.models import ProviderProfile, Course, Provider, Status, CourseStatus, Bio
 
 class CourseStatusAdmin(admin.ModelAdmin):
     list_display = ('profile', 'course', 'status')
@@ -15,10 +15,14 @@ class ProviderProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'username_provider', 'provider')
     list_filter = ('provider',)
 
+class BioAdmin(admin.ModelAdmin):
+    list_display = ('user', 'birth_date')
+
 
 admin.site.register(ProviderProfile, ProviderProfileAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Provider)
 admin.site.register(Status)
+admin.site.register(Bio, BioAdmin)
 admin.site.register(CourseStatus, CourseStatusAdmin)
 
