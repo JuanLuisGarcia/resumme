@@ -1,61 +1,82 @@
-from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
-from user_profile.models import ProviderProfile, Course, Provider, Status, CourseStatus
-import requests
-import timeit
+from django.core.management.base import BaseCommand, CommandError
+from pymongo import MongoClient
+
+from user_profile.models import ProviderProfile, CourseStatus, Bio
+
 
 class Command(BaseCommand):
-    help = 'Scraps courses from codeschool'
+    help = 'Saves in a local mongoDB the user profiles serialized'
 
     def handle(self, *args, **options):
 
-        def manage_relation_course_profile(profile, course, status):
-            relation, created = CourseStatus.objects.update_or_create(profile=profile,
-                                                                      course=course,
-                                                                      status=status)
+        def serialize_user_provider_profiles(user_provider_list):
+            """
+            Serializes the courses of a provider profile
+            :param user_provider_list: provider profile object
+            :return: dictionary that contains the finished and in
+            progress courses.
+            """
+            course_list = {}
+            for user_provider_profile in user_provider_list:
+                courses = CourseStatus.objects.filter(profile=user_provider_profile)
 
-        def add_courses_to_user(user, courses, status, provider):
-            status = Status.objects.get(name=status)
-            provider = Provider.objects.get(name=provider)
-            profile, created = ProviderProfile.objects.get_or_create(user=user,
-                                                                     provider=provider)
-
-            for course in courses:
-                new_course, created = Course.objects.get_or_create(
-                    title=course.get('title'),
-                    url=course.get('url'),
-                    badge=course.get('badge'),
-                    provider=provider
+                course_list['completed'] = serialize_course_list(
+                    course_list=courses.filter(status__name="c").all()
                 )
-                manage_relation_course_profile(profile, new_course, status)
-                # profile.CourseStatus.add(new_course)
-                # profile.save()
+                course_list['in_progress'] = serialize_course_list(
+                    course_list=courses.filter(status__name="i").all()
+                )
+            return course_list
 
+        def serialize_course_list(course_list):
+            """
+            Serializes the courses of a provider profile
+            :param course_list: courses of a provider profile
+            :return: list with the serialized courses
+            """
+            serialized_courses = []
+            for course in course_list.all():
+                serialized_courses.append(
+                    serialize_course(course)
+                )
+            return serialized_courses
 
+        def serialize_profile(user_profile):
+            """
+            Serializes an user profile object.
+            :param user_profile: user profile object
+            :return: dictionary with the user profile info
+            """
+            return {
+                'bio': user_profile.bio,
+                'description': user_profile.description,
+                'resume': user_profile.resume,
+                'birth_date': user_profile.birth_date.strftime("%d-%m-%Y")
+            }
 
-        CODESCHOOL_URL = 'https://www.codeschool.com/users/{}.json'
-        for profile in ProviderProfile.objects.all():
+        def serialize_course(course_status_object):
+            return {
+                'title': course_status_object.course.title,
+                'url': course_status_object.course.url,
+                'badge': course_status_object.course.badge,
+                'provider': course_status_object.course.provider.name
+            }
+
+        collection_db = MongoClient().resumme.profiles
+        for user in User.objects.all():
             try:
-                start = timeit.default_timer()
+                data = {}
+                data['profile'] = serialize_profile(
+                    Bio.objects.get(user=user)
+                )
 
-                # Your statements here
+                data['courses'] = serialize_user_provider_profiles(
+                    ProviderProfile.objects.filter(user=user)
+                )
+                collection_db.update_one({"_id": user.username},
+                                         {"$set": data},
+                                         upsert=True)
 
-                if not profile.username_provider:
-                    raise Exception('Username does not have a provider profile')
-                url = CODESCHOOL_URL.format(profile.username_provider)
-                # print('Doing request to ... {}'.format(url))
-                response = requests.get(url).json()
-                courses = response.get('courses')
-                add_courses_to_user(user=profile.user,
-                                    courses=courses.get('in_progress'),
-                                    status='i',
-                                    provider='codeschool')
-
-                add_courses_to_user(user=profile.user,
-                                    courses=courses.get('completed'),
-                                    status='c',
-                                    provider='codeschool')
-                stop = timeit.default_timer()
-                print(stop-start)
             except Exception as e:
                 raise CommandError('Error in request {}'.format(e))
