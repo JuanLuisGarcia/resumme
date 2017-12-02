@@ -17,10 +17,18 @@ class Status(models.Model):
     Each Course has an status:
     completed  or in_progress
     """
-    name = models.CharField(max_length=32)
+    STATUS_CHOICES = (
+        ('c', 'completed'),
+        ('i', 'in_progress'),
+    )
+    name = models.CharField(max_length=1, choices=STATUS_CHOICES)
 
     def __str__(self):
-        return self.name
+        """ I know this is bullshit, I need to fix this"""
+        if self.name == 'c':
+            return 'completed'
+        if self.name == 'i':
+            return 'in_progress'
 
 
 class Course(models.Model):
