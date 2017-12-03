@@ -1,5 +1,5 @@
 from django.contrib import admin
-from user_profile.models import ProviderProfile, Course, Provider, Status, CourseStatus, Bio
+from core.models import ProviderProfile, Course, Provider, Status, CourseStatus, Bio
 
 class CourseStatusAdmin(admin.ModelAdmin):
     list_display = ('profile', 'course', 'status')

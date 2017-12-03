@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
 from pymongo import MongoClient
 
-from user_profile.models import ProviderProfile, CourseStatus, Bio
+from core.models import ProviderProfile, CourseStatus, Bio
 
 
 class Command(BaseCommand):
