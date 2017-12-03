@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
-from user_profile.models import ProviderProfile, Course, Provider, Status, CourseStatus
+from core.models import ProviderProfile, Course, Provider, Status, CourseStatus
 import requests
 import timeit
 

@@ -1,0 +1,19 @@
+<h3 class="title has-text-grey has-text-centered">Sign up</h3>
+<form method="post" class="auth-form">
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="field">
+            <h2>{{ field.label_tag }}</h2>
+            <div class="control">
+                {{ field }}
+            </div>
+        </div>
+        {% for error in field.errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+    {% endfor %}
+    <div class="has-text-centered" style="margin-bottom: 15px;">
+        <button class="button is-primary is-outlined is-large" type="submit">Sign up</button>
+    </div>
+    <p class="has-text-centered"><a href="{% url 'login' %}">Already registered? Log in</a></p>
+</form>
