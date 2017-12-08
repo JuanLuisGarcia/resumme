@@ -18,10 +18,14 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
 from authentication import views as core_views
+from api.views import UserProfileData
+from profiles.views import LoadProfileView
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^api/profile/(?P<username>\w{0,50})/$', UserProfileData),
+    url(r'^(?P<username>\w{0,50})/$', LoadProfileView),
     url(r'^$', core_views.home, name='home'),
     url(r'^auth/login/$', auth_views.login, {'template_name': 'auth/login.html'}, name='login'),
     url(r'^auth/logout/$', auth_views.logout, {'next_page': 'login'}, name='logout'),
