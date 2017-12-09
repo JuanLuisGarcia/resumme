@@ -19,10 +19,10 @@ from django.contrib.auth import views as auth_views
 
 from authentication import views as core_views
 from api.views import UserProfileData
-from profiles.views import LoadProfileView
-
+from profiles.views import LoadProfileView, ProfileEditView
 
 urlpatterns = [
+    url(r'^edit/$', ProfileEditView.as_view(), name='profile_edit'),
     url(r'^admin/', admin.site.urls),
     url(r'^api/profile/(?P<username>\w{0,50})/$', UserProfileData),
     url(r'^(?P<username>\w{0,50})/$', LoadProfileView),

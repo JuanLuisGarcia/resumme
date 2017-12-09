@@ -74,6 +74,6 @@ class CourseStatus(models.Model):
     """
     Each course of each profile has an status
     """
-    course = models.ForeignKey(Course)
-    profile = models.ForeignKey(ProviderProfile)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    profile = models.ForeignKey(ProviderProfile, on_delete=models.CASCADE)
     status = models.ForeignKey(Status, on_delete=models.CASCADE)
