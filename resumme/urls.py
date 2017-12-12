@@ -15,20 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf.urls import url
-from django.contrib.auth import views as auth_views
-
+from django.urls import include
 from authentication import views as core_views
-from api.views import UserProfileData
-from profiles.views import LoadProfileView, ProfileEditView
 
 urlpatterns = [
-    url(r'^edit/$', ProfileEditView.as_view(), name='profile_edit'),
     url(r'^admin/', admin.site.urls),
-    url(r'^api/profile/(?P<username>\w{0,50})/$', UserProfileData),
-    url(r'^(?P<username>\w{0,50})/$', LoadProfileView),
+    url(r'^api/', include('api.urls')),
+    url(r'^profile/', include('profiles.urls')),
     url(r'^$', core_views.home, name='home'),
-    url(r'^auth/login/$', auth_views.login, {'template_name': 'auth/login.html'}, name='login'),
-    url(r'^auth/logout/$', auth_views.logout, {'next_page': 'login'}, name='logout'),
-    url(r'^auth/signup/$', core_views.signup, name='signup'),
+    url(r'^auth/', include('authentication.urls')),
 ]
-
